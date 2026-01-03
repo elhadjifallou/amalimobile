@@ -1,0 +1,149 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Variables pour safe areas */
+  :root {
+    --safe-area-inset-top: env(safe-area-inset-top, 0px);
+    --safe-area-inset-right: env(safe-area-inset-right, 0px);
+    --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-area-inset-left: env(safe-area-inset-left, 0px);
+  }
+
+  * {
+    @apply border-slate-200;
+  }
+  
+  body {
+    @apply bg-gradient-to-b from-slate-50 to-white text-slate-900 antialiased;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    /* Padding pour éviter le chevauchement avec la navigation système */
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    margin: 0;
+  }
+
+  /* Container principal de l'app */
+  #root {
+    min-height: 100vh;
+    /* Assurer que le contenu ne se cache pas derrière la bottom nav */
+    padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px));
+  }
+
+  h1 {
+    @apply text-2xl font-bold;
+  }
+
+  h2 {
+    @apply text-xl font-semibold;
+  }
+
+  h3 {
+    @apply text-lg font-semibold;
+  }
+}
+
+@layer utilities {
+  .active\:scale-98:active {
+    transform: scale(0.98);
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Utilitaire pour la bottom navigation avec safe area */
+  .bottom-nav-safe {
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Utilitaire pour le padding bottom avec safe area */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /* Utilitaire pour le margin bottom avec safe area */
+  .mb-safe {
+    margin-bottom: env(safe-area-inset-bottom, 0px);
+  }
+}
+
+/* Styles personnalisés pour l'app */
+.card-shadow {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.card-shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Animation de swipe */
+@keyframes swipeLeft {
+  to {
+    transform: translateX(-200%) rotate(-20deg);
+    opacity: 0;
+  }
+}
+
+@keyframes swipeRight {
+  to {
+    transform: translateX(200%) rotate(20deg);
+    opacity: 0;
+  }
+}
+
+.swipe-left {
+  animation: swipeLeft 0.3s ease-out forwards;
+}
+
+.swipe-right {
+  animation: swipeRight 0.3s ease-out forwards;
+}
+
+/* Scrollbar personnalisée */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+/* Ajoute ce CSS dans ton fichier index.css ou globals.css */
+
+/* Masquer la scrollbar tout en gardant le scroll fonctionnel */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE et Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari et Opera */
+}
+
+/* OU utilise ce CSS si tu veux une scrollbar personnalisée */
+.custom-scrollbar::-webkit-scrollbar {
+  height: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
