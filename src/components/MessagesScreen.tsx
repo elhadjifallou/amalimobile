@@ -45,7 +45,7 @@ interface ChatScreenConversation {
 
 interface MessagesScreenProps {
   onChatStateChange?: (isInChat: boolean) => void;
-  onNotificationCountChange?: (count: number) => void; // ✅ AJOUTÉ
+  onNotificationCountChange?: (count: number) => void;
 }
 
 export default function MessagesScreen({ onChatStateChange, onNotificationCountChange }: MessagesScreenProps = {}) {
@@ -61,7 +61,7 @@ export default function MessagesScreen({ onChatStateChange, onNotificationCountC
     onChatStateChange?.(selectedConversation !== null);
   }, [selectedConversation, onChatStateChange]);
 
-  // ✅ AJOUTÉ : Calculer et envoyer le nombre de notifications
+  // Calculer et envoyer le nombre de notifications
   useEffect(() => {
     const totalUnread = conversations.reduce((sum, conv) => {
       const unreadCount = conv.user1_id === userId
@@ -285,7 +285,7 @@ export default function MessagesScreen({ onChatStateChange, onNotificationCountC
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-white dark:bg-slate-900">
+      <div className="fixed inset-0 flex items-center justify-center bg-white dark:bg-slate-900">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-rose-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-slate-600 dark:text-slate-400">Chargement...</p>
@@ -295,18 +295,12 @@ export default function MessagesScreen({ onChatStateChange, onNotificationCountC
   }
 
   return (
-    <div 
-      className="flex flex-col h-screen bg-white dark:bg-slate-900"
-      style={{
-        paddingTop: 'calc(env(safe-area-inset-top) + 16px)',
-      }}
-    >
-      {/* Nouveaux matchs */}
+    <div className="fixed inset-0 bg-white dark:bg-slate-900 flex flex-col">
+      {/* Nouveaux matchs - Fixed */}
       {newMatches.length > 0 && (
-        <div className="sticky top-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 px-6 py-4">
+        <div className="flex-shrink-0 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 px-6 py-4 pt-20">
           <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
             Nouveaux Matchs
-            {/* ✅ AJOUTÉ : Badge rouge pour nouveaux matchs */}
             <span className="px-2 py-0.5 bg-rose-500 text-white text-xs font-bold rounded-full">
               {newMatches.length}
             </span>
@@ -339,8 +333,8 @@ export default function MessagesScreen({ onChatStateChange, onNotificationCountC
         </div>
       )}
 
-      {/* Barre de recherche */}
-      <div className="sticky top-0 z-10 px-6 py-3 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
+      {/* Barre de recherche - Fixed */}
+      <div className={`flex-shrink-0 px-6 py-3 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 ${newMatches.length === 0 ? 'pt-20' : ''}`}>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
           <input
@@ -353,7 +347,7 @@ export default function MessagesScreen({ onChatStateChange, onNotificationCountC
         </div>
       </div>
 
-      {/* Liste des conversations */}
+      {/* Liste des conversations - Scrollable */}
       <div className="flex-1 overflow-y-auto">
         {filteredConversations.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full px-6 text-center">
@@ -386,7 +380,6 @@ export default function MessagesScreen({ onChatStateChange, onNotificationCountC
                       alt={conv.otherUser.name}
                       className="w-16 h-16 rounded-full object-cover"
                     />
-                    {/* ✅ Badge rouge sur photo pour messages non lus */}
                     {unreadCount > 0 && (
                       <div className="absolute -top-1 -right-1 w-6 h-6 bg-rose-500 rounded-full flex items-center justify-center">
                         <span className="text-xs font-bold text-white">{unreadCount}</span>
@@ -406,7 +399,6 @@ export default function MessagesScreen({ onChatStateChange, onNotificationCountC
                         })}
                       </span>
                     </div>
-                    {/* ✅ Message en gras si non lu */}
                     <p className={`text-sm truncate ${unreadCount > 0 ? 'font-semibold text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400'}`}>
                       {conv.last_message || 'Démarrez la conversation...'}
                     </p>

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Send, Image as ImageIcon, Smile } from 'lucide-react';
+import { ArrowLeft, Send, Image as ImageIcon, Smile, MoreVertical, Ban, Trash2, Flag, X } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/utils/cn';
 import UserProfileScreen from './UserProfileScreen';
@@ -35,6 +35,8 @@ export default function ChatScreen({ conversation, currentUserId, onBack }: Chat
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -46,7 +48,6 @@ export default function ChatScreen({ conversation, currentUserId, onBack }: Chat
     loadMessages();
     markMessagesAsRead();
 
-    // Auto-focus pour ouvrir le clavier
     setTimeout(() => {
       inputRef.current?.focus();
     }, 300);
@@ -160,6 +161,88 @@ export default function ChatScreen({ conversation, currentUserId, onBack }: Chat
         .eq('id', messageId);
     } catch (error) {
       console.error('Erreur marquage message lu:', error);
+    }
+  };
+
+  // Bloquer l'utilisateur
+  const handleBlock = async () => {
+    const confirm = window.confirm(`Êtes-vous sûr de vouloir bloquer ${conversation.other_user_name} ?\n\nVous ne pourrez plus recevoir de messages de cette personne.`);
+    
+    if (!confirm) return;
+
+    try {
+      const { error } = await supabase
+        .from('blocked_users')
+        .insert({
+          blocker_id: currentUserId,
+          blocked_id: otherUserId,
+        });
+
+      if (error) throw error;
+
+      alert(`✅ ${conversation.other_user_name} a été bloqué(e)`);
+      setShowMenu(false);
+      onBack();
+    } catch (error: any) {
+      console.error('Erreur blocage:', error);
+      if (error.code === '23505') {
+        alert('Cet utilisateur est déjà bloqué');
+      } else {
+        alert('Erreur lors du blocage');
+      }
+    }
+  };
+
+  // Supprimer la conversation
+  const handleDelete = async () => {
+    const confirm = window.confirm(`Êtes-vous sûr de vouloir supprimer cette conversation avec ${conversation.other_user_name} ?\n\nCette action est irréversible.`);
+    
+    if (!confirm) return;
+
+    try {
+      // Supprimer tous les messages
+      await supabase
+        .from('messages')
+        .delete()
+        .eq('conversation_id', conversation.id);
+
+      // Supprimer la conversation
+      const { error } = await supabase
+        .from('conversations')
+        .delete()
+        .eq('id', conversation.id);
+
+      if (error) throw error;
+
+      alert('✅ Conversation supprimée');
+      setShowMenu(false);
+      onBack();
+    } catch (error) {
+      console.error('Erreur suppression:', error);
+      alert('Erreur lors de la suppression');
+    }
+  };
+
+  // Signaler l'utilisateur
+  const handleReport = async (reason: string, details: string) => {
+    try {
+      const { error } = await supabase
+        .from('reports')
+        .insert({
+          reporter_id: currentUserId,
+          reported_user_id: otherUserId,
+          reason: reason,
+          details: details,
+        });
+
+      if (error) throw error;
+
+      alert('✅ Utilisateur signalé. Notre équipe va examiner le signalement.');
+      setShowReportModal(false);
+      setShowMenu(false);
+    } catch (error) {
+      console.error('Erreur signalement:', error);
+      alert('Erreur lors du signalement');
     }
   };
 
@@ -344,7 +427,64 @@ export default function ChatScreen({ conversation, currentUserId, onBack }: Chat
             <p className="text-xs text-emerald-600 dark:text-emerald-400">En ligne</p>
           </div>
         </button>
+
+        {/* Bouton Menu (3 points) */}
+        <div className="relative">
+          <button
+            onClick={() => setShowMenu(!showMenu)}
+            className="w-10 h-10 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center transition-colors"
+          >
+            <MoreVertical className="w-5 h-5 text-slate-700 dark:text-slate-300" />
+          </button>
+
+          {/* Menu déroulant */}
+          {showMenu && (
+            <>
+              <div 
+                className="fixed inset-0 z-40"
+                onClick={() => setShowMenu(false)}
+              />
+              <div className="absolute right-0 top-12 z-50 w-56 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 py-2">
+                <button
+                  onClick={handleBlock}
+                  className="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-left"
+                >
+                  <Ban className="w-5 h-5 text-orange-600" />
+                  <span className="text-slate-900 dark:text-white font-medium">Bloquer</span>
+                </button>
+                
+                <button
+                  onClick={handleDelete}
+                  className="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-left"
+                >
+                  <Trash2 className="w-5 h-5 text-red-600" />
+                  <span className="text-slate-900 dark:text-white font-medium">Supprimer</span>
+                </button>
+                
+                <button
+                  onClick={() => {
+                    setShowMenu(false);
+                    setShowReportModal(true);
+                  }}
+                  className="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-left"
+                >
+                  <Flag className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+                  <span className="text-slate-900 dark:text-white font-medium">Signaler</span>
+                </button>
+              </div>
+            </>
+          )}
+        </div>
       </div>
+
+      {/* Modal de signalement */}
+      {showReportModal && (
+        <ReportModal
+          userName={conversation.other_user_name}
+          onClose={() => setShowReportModal(false)}
+          onSubmit={handleReport}
+        />
+      )}
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
@@ -409,7 +549,7 @@ export default function ChatScreen({ conversation, currentUserId, onBack }: Chat
         )}
       </div>
 
-      {/* Input - avec padding pour le clavier */}
+      {/* Input */}
       <div 
         className="sticky bottom-0 z-10 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 p-4"
         style={{
@@ -453,6 +593,108 @@ export default function ChatScreen({ conversation, currentUserId, onBack }: Chat
               <Send className="w-5 h-5" />
             )}
           </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Composant Modal de signalement
+interface ReportModalProps {
+  userName: string;
+  onClose: () => void;
+  onSubmit: (reason: string, details: string) => void;
+}
+
+function ReportModal({ userName, onClose, onSubmit }: ReportModalProps) {
+  const [reason, setReason] = useState('');
+  const [details, setDetails] = useState('');
+
+  const reasons = [
+    'Comportement inapproprié',
+    'Harcèlement',
+    'Contenu offensant',
+    'Spam',
+    'Faux profil',
+    'Autre',
+  ];
+
+  return (
+    <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/50">
+      <div className="bg-white dark:bg-slate-800 rounded-2xl max-w-md w-full p-6 max-h-[80vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+            Signaler {userName}
+          </h3>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center"
+          >
+            <X className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+          </button>
+        </div>
+
+        <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+          Merci de nous aider à maintenir une communauté sûre et respectueuse.
+        </p>
+
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-900 dark:text-white mb-2">
+              Raison du signalement
+            </label>
+            <div className="space-y-2">
+              {reasons.map((r) => (
+                <button
+                  key={r}
+                  onClick={() => setReason(r)}
+                  className={cn(
+                    "w-full px-4 py-3 rounded-xl border-2 text-left transition-all",
+                    reason === r
+                      ? "border-rose-500 bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-400"
+                      : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 text-slate-900 dark:text-white"
+                  )}
+                >
+                  {r}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-900 dark:text-white mb-2">
+              Détails (optionnel)
+            </label>
+            <textarea
+              value={details}
+              onChange={(e) => setDetails(e.target.value)}
+              placeholder="Décrivez le problème..."
+              rows={4}
+              className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+            />
+          </div>
+
+          <div className="flex gap-3 pt-2">
+            <button
+              onClick={onClose}
+              className="flex-1 py-3 px-4 border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+            >
+              Annuler
+            </button>
+            <button
+              onClick={() => {
+                if (!reason) {
+                  alert('Veuillez sélectionner une raison');
+                  return;
+                }
+                onSubmit(reason, details);
+              }}
+              disabled={!reason}
+              className="flex-1 py-3 px-4 bg-gradient-to-r from-rose-500 to-red-600 text-white rounded-xl font-semibold hover:from-rose-600 hover:to-red-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Signaler
+            </button>
+          </div>
         </div>
       </div>
     </div>

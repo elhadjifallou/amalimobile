@@ -14,7 +14,6 @@ export default function ProfileScreen() {
   const [profilePhotoUrl, setProfilePhotoUrl] = useState<string | null>(null);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   
-  // ✅ AJOUTÉ : States premium
   const [isPremium, setIsPremium] = useState(false);
   const [premiumTier, setPremiumTier] = useState<string | null>(null);
   
@@ -35,7 +34,6 @@ export default function ProfileScreen() {
     if (user) {
       setUser(user as AuthUser);
       
-      // ✅ MODIFIÉ : Charger is_premium et premium_tier
       const { data: profile } = await supabase
         .from('profiles')
         .select('profile_photo_url, is_premium, premium_tier')
@@ -48,7 +46,6 @@ export default function ProfileScreen() {
         setProfilePhotoUrl(profile.profile_photo_url);
       }
       
-      // ✅ AJOUTÉ : Charger le statut premium
       if (profile?.is_premium) {
         setIsPremium(true);
         setPremiumTier(profile.premium_tier);
@@ -120,7 +117,6 @@ export default function ProfileScreen() {
     }
   };
 
-  // ✅ AJOUTÉ : Fonction pour obtenir les infos du tier
   const getTierInfo = () => {
     switch (premiumTier) {
       case 'essentiel':
@@ -295,7 +291,7 @@ export default function ProfileScreen() {
   if (showPremium) {
     return <PremiumScreen onClose={() => {
       setShowPremium(false);
-      loadUser(); // ✅ AJOUTÉ : Recharger après achat
+      loadUser();
     }} />;
   }
 
@@ -304,7 +300,7 @@ export default function ProfileScreen() {
   }
 
   return (
-    <>
+    <div className="fixed inset-0 bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-800 flex flex-col">
       <Header showSettings={false} />
       
       {isEditing && user && (
@@ -315,179 +311,172 @@ export default function ProfileScreen() {
         />
       )}
       
-      <div 
-        className="flex flex-col h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-800"
-        style={{
-          paddingTop: 'calc(env(safe-area-inset-top) + 80px)',
-          paddingBottom: 'calc(env(safe-area-inset-bottom) + 80px)',
-        }}
-      >
-        <div className="flex-1 overflow-y-auto px-5 pt-6 pb-4">
-          {/* Carte de profil */}
-          <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 mb-6">
-            {/* Image de profil et info de base */}
-            <div className="flex flex-col items-center text-center mb-6">
-              <div className="relative mb-4">
-                {profilePhotoUrl ? (
-                  <img
-                    src={profilePhotoUrl}
-                    alt="Photo de profil"
-                    className="w-24 h-24 rounded-full object-cover border-4 border-white dark:border-slate-700 shadow-lg"
-                  />
-                ) : (
-                  <div className="w-24 h-24 bg-gradient-to-br from-rose-500 to-amber-500 rounded-full flex items-center justify-center text-white border-4 border-white dark:border-slate-700 shadow-lg">
-                    <span className="text-3xl font-bold">
-                      {user?.user_metadata?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
-                    </span>
-                  </div>
-                )}
-                
-                <label className="absolute bottom-0 right-0 w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center border-2 border-white dark:border-slate-700 hover:bg-emerald-600 transition-colors cursor-pointer shadow-md">
-                  {isUploadingPhoto ? (
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <Camera className="w-4 h-4 text-white" />
-                  )}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handlePhotoUpload}
-                    className="hidden"
-                    disabled={isUploadingPhoto}
-                  />
-                </label>
-              </div>
-              
-              {/* ✅ MODIFIÉ : Nom avec badge bleu */}
-              <div className="flex items-center gap-2 mb-1">
-                <h2 className="text-slate-900 dark:text-white font-bold text-xl">
-                  {user?.user_metadata?.name || 'Mon Profil'}
-                </h2>
-                {isPremium && (
-                  <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-                    <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                )}
-              </div>
-              
-              <p className="text-slate-600 dark:text-slate-400 mb-1">{user?.email || 'Email non disponible'}</p>
-              {user?.user_metadata?.phone && (
-                <p className="text-slate-500 dark:text-slate-500 text-sm mb-3">{user.user_metadata.phone}</p>
-              )}
-              {!user?.user_metadata?.phone && (
-                <p className="text-slate-500 dark:text-slate-500 text-sm mb-3">Dakar, Sénégal</p>
-              )}
-              
-              <div className="flex items-center gap-2 px-4 py-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-full">
-                <Shield className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                <span className="text-emerald-700 dark:text-emerald-400 text-sm font-medium">Profil vérifié</span>
-              </div>
-            </div>
-
-            {/* ✅ MODIFIÉ : Avantages Premium ou CTA */}
-            {isPremium && tierInfo ? (
-              <div className={`p-5 ${tierInfo.bgColor} border-2 ${tierInfo.borderColor} rounded-2xl mb-6`}>
-                <div className="flex items-center gap-2 mb-3">
-                  <tierInfo.icon className="w-5 h-5" />
-                  <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-                    Membre {tierInfo.name}
-                  </h3>
-                </div>
-                <div className="space-y-2">
-                  {tierInfo.features.map((feature, index) => (
-                    <div key={index} className="flex items-center gap-2">
-                      <div className={`w-5 h-5 rounded-full bg-gradient-to-r ${tierInfo.gradient} flex items-center justify-center flex-shrink-0`}>
-                        <Check className="w-3 h-3 text-white" />
-                      </div>
-                      <span className="text-sm text-slate-700 dark:text-slate-300 font-medium">{feature}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <button 
-                onClick={() => setShowPremium(true)}
-                className="w-full mb-6 p-4 bg-gradient-to-r from-amber-500 to-orange-600 rounded-2xl text-white hover:from-amber-600 hover:to-orange-700 transition-all shadow-lg hover:shadow-xl active:scale-98"
-              >
-                <div className="flex items-center justify-center gap-3">
-                  <Crown className="w-5 h-5" />
-                  <span className="font-semibold">Passer à Premium</span>
-                </div>
-              </button>
-            )}
-
-            {/* Statistiques */}
-            <div className="grid grid-cols-3 gap-3 pt-4">
-              {loadingStats ? (
-                <>
-                  <StatItem value="..." label="Matchs" />
-                  <StatItem value="..." label="Compatibilité" />
-                  <StatItem value="..." label="Conversations" />
-                </>
+      {/* Content scrollable */}
+      <div className="flex-1 overflow-y-auto px-5 py-6 pt-20">
+        {/* Carte de profil */}
+        <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 mb-6">
+          {/* Image de profil et info de base */}
+          <div className="flex flex-col items-center text-center mb-6">
+            <div className="relative mb-4">
+              {profilePhotoUrl ? (
+                <img
+                  src={profilePhotoUrl}
+                  alt="Photo de profil"
+                  className="w-24 h-24 rounded-full object-cover border-4 border-white dark:border-slate-700 shadow-lg"
+                />
               ) : (
-                <>
-                  <StatItem value={stats.matches.toString()} label="Matchs" />
-                  <StatItem 
-                    value={stats.compatibility > 0 ? `${stats.compatibility}%` : '—'} 
-                    label="Compatibilité" 
-                  />
-                  <StatItem value={stats.conversations.toString()} label="Conversations" />
-                </>
+                <div className="w-24 h-24 bg-gradient-to-br from-rose-500 to-amber-500 rounded-full flex items-center justify-center text-white border-4 border-white dark:border-slate-700 shadow-lg">
+                  <span className="text-3xl font-bold">
+                    {user?.user_metadata?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
+                  </span>
+                </div>
               )}
+              
+              <label className="absolute bottom-0 right-0 w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center border-2 border-white dark:border-slate-700 hover:bg-emerald-600 transition-colors cursor-pointer shadow-md">
+                {isUploadingPhoto ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Camera className="w-4 h-4 text-white" />
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePhotoUpload}
+                  className="hidden"
+                  disabled={isUploadingPhoto}
+                />
+              </label>
+            </div>
+            
+            {/* Nom avec badge bleu */}
+            <div className="flex items-center gap-2 mb-1">
+              <h2 className="text-slate-900 dark:text-white font-bold text-xl">
+                {user?.user_metadata?.name || 'Mon Profil'}
+              </h2>
+              {isPremium && (
+                <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                  <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                </div>
+              )}
+            </div>
+            
+            <p className="text-slate-600 dark:text-slate-400 mb-1">{user?.email || 'Email non disponible'}</p>
+            {user?.user_metadata?.phone && (
+              <p className="text-slate-500 dark:text-slate-500 text-sm mb-3">{user.user_metadata.phone}</p>
+            )}
+            {!user?.user_metadata?.phone && (
+              <p className="text-slate-500 dark:text-slate-500 text-sm mb-3">Dakar, Sénégal</p>
+            )}
+            
+            <div className="flex items-center gap-2 px-4 py-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-full">
+              <Shield className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              <span className="text-emerald-700 dark:text-emerald-400 text-sm font-medium">Profil vérifié</span>
             </div>
           </div>
 
-          {/* Options du menu */}
-          <div className="space-y-2 pb-4">
-            <MenuItem 
-              icon={User} 
-              label="Modifier le profil" 
-              onClick={() => setIsEditing(true)} 
-            />
-            <MenuItem 
-              icon={Shield} 
-              label="Mode Halal & Confidentialité" 
-              badge="Actif" 
-              onClick={() => setShowSettings(true)} 
-            />
-            <MenuItem 
-              icon={Bell} 
-              label="Notifications" 
-              onClick={() => setShowSettings(true)} 
-            />
-            <MenuItem 
-              icon={Settings} 
-              label="Paramètres" 
-              onClick={() => setShowSettings(true)} 
-            />
-            <MenuItem 
-              icon={HelpCircle} 
-              label="Aide & Support" 
-              onClick={() => alert('Contactez-nous à support@amali.app')} 
-            />
-            <MenuItem 
-              icon={Home} 
-              label="Retour à l'accueil" 
-              onClick={() => window.location.reload()} 
-            />
-            <MenuItem 
-              icon={LogOut} 
-              label="Se déconnecter" 
-              variant="danger" 
-              onClick={handleLogout} 
-            />
-            <MenuItem 
-              icon={Trash2} 
-              label="Supprimer mon compte" 
-              variant="danger" 
-              onClick={handleDeleteAccount} 
-            />
+          {/* Avantages Premium ou CTA */}
+          {isPremium && tierInfo ? (
+            <div className={`p-5 ${tierInfo.bgColor} border-2 ${tierInfo.borderColor} rounded-2xl mb-6`}>
+              <div className="flex items-center gap-2 mb-3">
+                <tierInfo.icon className="w-5 h-5" />
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                  Membre {tierInfo.name}
+                </h3>
+              </div>
+              <div className="space-y-2">
+                {tierInfo.features.map((feature, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <div className={`w-5 h-5 rounded-full bg-gradient-to-r ${tierInfo.gradient} flex items-center justify-center flex-shrink-0`}>
+                      <Check className="w-3 h-3 text-white" />
+                    </div>
+                    <span className="text-sm text-slate-700 dark:text-slate-300 font-medium">{feature}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <button 
+              onClick={() => setShowPremium(true)}
+              className="w-full mb-6 p-4 bg-gradient-to-r from-amber-500 to-orange-600 rounded-2xl text-white hover:from-amber-600 hover:to-orange-700 transition-all shadow-lg hover:shadow-xl active:scale-98"
+            >
+              <div className="flex items-center justify-center gap-3">
+                <Crown className="w-5 h-5" />
+                <span className="font-semibold">Passer à Premium</span>
+              </div>
+            </button>
+          )}
+
+          {/* Statistiques */}
+          <div className="grid grid-cols-3 gap-3 pt-4">
+            {loadingStats ? (
+              <>
+                <StatItem value="..." label="Matchs" />
+                <StatItem value="..." label="Compatibilité" />
+                <StatItem value="..." label="Conversations" />
+              </>
+            ) : (
+              <>
+                <StatItem value={stats.matches.toString()} label="Matchs" />
+                <StatItem 
+                  value={stats.compatibility > 0 ? `${stats.compatibility}%` : '—'} 
+                  label="Compatibilité" 
+                />
+                <StatItem value={stats.conversations.toString()} label="Conversations" />
+              </>
+            )}
           </div>
         </div>
+
+        {/* Options du menu */}
+        <div className="space-y-2 pb-32">
+          <MenuItem 
+            icon={User} 
+            label="Modifier le profil" 
+            onClick={() => setIsEditing(true)} 
+          />
+          <MenuItem 
+            icon={Shield} 
+            label="Mode Halal & Confidentialité" 
+            badge="Actif" 
+            onClick={() => setShowSettings(true)} 
+          />
+          <MenuItem 
+            icon={Bell} 
+            label="Notifications" 
+            onClick={() => setShowSettings(true)} 
+          />
+          <MenuItem 
+            icon={Settings} 
+            label="Paramètres" 
+            onClick={() => setShowSettings(true)} 
+          />
+          <MenuItem 
+            icon={HelpCircle} 
+            label="Aide & Support" 
+            onClick={() => alert('Contactez-nous à support@amali.app')} 
+          />
+          <MenuItem 
+            icon={Home} 
+            label="Retour à l'accueil" 
+            onClick={() => window.location.reload()} 
+          />
+          <MenuItem 
+            icon={LogOut} 
+            label="Se déconnecter" 
+            variant="danger" 
+            onClick={handleLogout} 
+          />
+          <MenuItem 
+            icon={Trash2} 
+            label="Supprimer mon compte" 
+            variant="danger" 
+            onClick={handleDeleteAccount} 
+          />
+        </div>
       </div>
-    </>
+    </div>
   );
 }
 

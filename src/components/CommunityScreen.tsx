@@ -190,7 +190,7 @@ export default function CommunityScreen() {
   }
 
   return (
-    <>
+    <div className="fixed inset-0 bg-white dark:bg-slate-900 flex flex-col">
       <Header onSettingsClick={() => setShowSettings(true)} />
       
       {showCreateEvent && (
@@ -202,165 +202,159 @@ export default function CommunityScreen() {
         />
       )}
 
-      <div 
-        className="flex flex-col min-h-screen pb-16 bg-white dark:bg-slate-900"
-        style={{
-          paddingTop: 'calc(env(safe-area-inset-top) + 80px)',
-        }}
-      >
-        <div className="flex-1 px-5 pt-6 pb-4 overflow-y-auto">
-          {/* En-tête de la communauté */}
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-rose-500 to-amber-500 rounded-full mb-4">
-              <Heart className="w-8 h-8 text-white fill-white" />
-            </div>
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Communauté Amali</h2>
-            <p className="text-slate-600 dark:text-slate-400">
-              Une communauté respectueuse et bienveillante
-            </p>
+      {/* Content scrollable */}
+      <div className="flex-1 overflow-y-auto px-5 py-6 pt-20">
+        {/* En-tête de la communauté */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-rose-500 to-amber-500 rounded-full mb-4">
+            <Heart className="w-8 h-8 text-white fill-white" />
           </div>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Communauté Amali</h2>
+          <p className="text-slate-600 dark:text-slate-400">
+            Une communauté respectueuse et bienveillante
+          </p>
+        </div>
 
-          {/* Statistiques en temps réel */}
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            {communityStats.map((stat, index) => {
-              const Icon = stat.icon;
-              return (
-                <div 
-                  key={index}
-                  className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 hover:shadow-md transition-all"
-                >
-                  <div className={`inline-flex items-center justify-center w-12 h-12 rounded-xl ${stat.bg} mb-3`}>
-                    <Icon className={`w-6 h-6 ${stat.color}`} />
-                  </div>
-                  <p className="text-2xl font-bold text-slate-900 dark:text-white mb-1">{stat.value}</p>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">{stat.label}</p>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Badge Mode Halal */}
-          <div className="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl p-6 mb-6 text-white">
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
-                <Shield className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="font-bold text-lg mb-2">Mode Halal Actif</h3>
-                <p className="text-emerald-50 text-sm leading-relaxed">
-                  Toutes vos interactions sont protégées et respectent les valeurs islamiques. 
-                  Conversations respectueuses, pas de contenus inappropriés.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Articles et conseils */}
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white">📚 Conseils & Guides</h3>
-              <button 
-                onClick={() => setShowArticlesList(true)}
-                className="text-sm text-rose-600 dark:text-rose-400 font-medium hover:text-rose-700 dark:hover:text-rose-500 transition-colors"
+        {/* Statistiques en temps réel */}
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          {communityStats.map((stat, index) => {
+            const Icon = stat.icon;
+            return (
+              <div 
+                key={index}
+                className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 hover:shadow-md transition-all"
               >
-                Voir tout
-              </button>
-            </div>
-
-            <div className="space-y-3">
-              {articles.map((article) => (
-                <button
-                  key={article.id}
-                  onClick={() => setSelectedArticleId(article.id)}
-                  className="w-full bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 hover:shadow-md transition-all text-left"
-                >
-                  <div className="flex items-start gap-4">
-                    <div className={`w-12 h-12 bg-gradient-to-br ${article.color} rounded-xl flex items-center justify-center flex-shrink-0`}>
-                      <BookOpen className="w-6 h-6 text-white" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 text-xs font-medium rounded-full">
-                          {article.category}
-                        </span>
-                        <span className="text-xs text-slate-500 dark:text-slate-500">{article.readTime}</span>
-                      </div>
-                      <h4 className="font-semibold text-slate-900 dark:text-white mb-1">{article.title}</h4>
-                      <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2">{article.excerpt}</p>
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Histoires de réussite */}
-          <div className="mb-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Sparkles className="w-5 h-5 text-amber-500" />
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white">Histoires de réussite</h3>
-            </div>
-
-            <div className="space-y-4">
-              {successStories.map((story) => (
-                <div
-                  key={story.id}
-                  className="bg-gradient-to-br from-amber-50 to-rose-50 dark:from-amber-900/20 dark:to-rose-900/20 rounded-2xl p-5 border border-amber-100 dark:border-amber-800"
-                >
-                  <div className="flex items-start gap-3 mb-3">
-                    <div className={`w-10 h-10 ${story.avatar} rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0`}>
-                      {story.author[0]}
-                    </div>
-                    <div>
-                      <p className="font-semibold text-slate-900 dark:text-white">{story.author}</p>
-                      <p className="text-sm text-slate-600 dark:text-slate-400">{story.location}</p>
-                    </div>
-                  </div>
-                  <p className="text-slate-700 dark:text-slate-300 italic leading-relaxed">
-                    "{story.text}"
-                  </p>
-                  <div className="flex items-center gap-1 mt-3 text-amber-600 dark:text-amber-400">
-                    {[...Array(5)].map((_, i) => (
-                      <Heart key={i} className="w-4 h-4 fill-current" />
-                    ))}
-                  </div>
+                <div className={`inline-flex items-center justify-center w-12 h-12 rounded-xl ${stat.bg} mb-3`}>
+                  <Icon className={`w-6 h-6 ${stat.color}`} />
                 </div>
-              ))}
-            </div>
-          </div>
+                <p className="text-2xl font-bold text-slate-900 dark:text-white mb-1">{stat.value}</p>
+                <p className="text-sm text-slate-600 dark:text-slate-400">{stat.label}</p>
+              </div>
+            );
+          })}
+        </div>
 
-          {/* Section Événements */}
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white">Événements à venir</h3>
+        {/* Badge Mode Halal */}
+        <div className="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl p-6 mb-6 text-white">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Shield className="w-6 h-6" />
             </div>
-            
-            <div className="space-y-3">
-              <EventCard
-                title="Rencontre communautaire - Dakar"
-                date="Samedi 30 Nov, 15h00"
-                participants={24}
-                location="Café Culturel, Almadies"
-              />
-              <EventCard
-                title="Discussion : Valeurs familiales"
-                date="Dimanche 1 Déc, 17h00"
-                participants={18}
-                location="En ligne (Zoom)"
-              />
+            <div>
+              <h3 className="font-bold text-lg mb-2">Mode Halal Actif</h3>
+              <p className="text-emerald-50 text-sm leading-relaxed">
+                Toutes vos interactions sont protégées et respectent les valeurs islamiques. 
+                Conversations respectueuses, pas de contenus inappropriés.
+              </p>
             </div>
-
-            <button 
-              onClick={() => setShowCreateEvent(true)}
-              className="w-full mt-4 py-3 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl text-slate-600 dark:text-slate-400 hover:border-rose-400 dark:hover:border-rose-500 hover:text-rose-600 dark:hover:text-rose-400 transition-all font-medium"
-            >
-              + Proposer un événement
-            </button>
           </div>
         </div>
+
+        {/* Articles et conseils */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white">📚 Conseils & Guides</h3>
+            <button 
+              onClick={() => setShowArticlesList(true)}
+              className="text-sm text-rose-600 dark:text-rose-400 font-medium hover:text-rose-700 dark:hover:text-rose-500 transition-colors"
+            >
+              Voir tout
+            </button>
+          </div>
+
+          <div className="space-y-3">
+            {articles.map((article) => (
+              <button
+                key={article.id}
+                onClick={() => setSelectedArticleId(article.id)}
+                className="w-full bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 hover:shadow-md transition-all text-left"
+              >
+                <div className="flex items-start gap-4">
+                  <div className={`w-12 h-12 bg-gradient-to-br ${article.color} rounded-xl flex items-center justify-center flex-shrink-0`}>
+                    <BookOpen className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 text-xs font-medium rounded-full">
+                        {article.category}
+                      </span>
+                      <span className="text-xs text-slate-500 dark:text-slate-500">{article.readTime}</span>
+                    </div>
+                    <h4 className="font-semibold text-slate-900 dark:text-white mb-1">{article.title}</h4>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2">{article.excerpt}</p>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Histoires de réussite */}
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Sparkles className="w-5 h-5 text-amber-500" />
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Histoires de réussite</h3>
+          </div>
+
+          <div className="space-y-4">
+            {successStories.map((story) => (
+              <div
+                key={story.id}
+                className="bg-gradient-to-br from-amber-50 to-rose-50 dark:from-amber-900/20 dark:to-rose-900/20 rounded-2xl p-5 border border-amber-100 dark:border-amber-800"
+              >
+                <div className="flex items-start gap-3 mb-3">
+                  <div className={`w-10 h-10 ${story.avatar} rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0`}>
+                    {story.author[0]}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-slate-900 dark:text-white">{story.author}</p>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">{story.location}</p>
+                  </div>
+                </div>
+                <p className="text-slate-700 dark:text-slate-300 italic leading-relaxed">
+                  "{story.text}"
+                </p>
+                <div className="flex items-center gap-1 mt-3 text-amber-600 dark:text-amber-400">
+                  {[...Array(5)].map((_, i) => (
+                    <Heart key={i} className="w-4 h-4 fill-current" />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Section Événements */}
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 mb-32">
+          <div className="flex items-center gap-2 mb-4">
+            <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Événements à venir</h3>
+          </div>
+          
+          <div className="space-y-3">
+            <EventCard
+              title="Rencontre communautaire - Dakar"
+              date="Samedi 30 Nov, 15h00"
+              participants={24}
+              location="Café Culturel, Almadies"
+            />
+            <EventCard
+              title="Discussion : Valeurs familiales"
+              date="Dimanche 1 Déc, 17h00"
+              participants={18}
+              location="En ligne (Zoom)"
+            />
+          </div>
+
+          <button 
+            onClick={() => setShowCreateEvent(true)}
+            className="w-full mt-4 py-3 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl text-slate-600 dark:text-slate-400 hover:border-rose-400 dark:hover:border-rose-500 hover:text-rose-600 dark:hover:text-rose-400 transition-all font-medium"
+          >
+            + Proposer un événement
+          </button>
+        </div>
       </div>
-    </>
+    </div>
   );
 }
 

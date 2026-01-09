@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, MapPin, Users, Heart, Calendar, Sparkles, Shield, Bell, Moon, Globe, Save, Loader2 } from 'lucide-react';
+import { ArrowLeft, MapPin, Users, Heart, Calendar, Sparkles, Shield, Bell, Moon, Save, Loader2 } from 'lucide-react';
 import { supabase, authService } from '@/lib/supabase';
 import { useTheme } from '@/contexts/ThemeContext';
 
@@ -10,7 +10,6 @@ interface SettingsScreenProps {
 export default function SettingsScreen({ onClose }: SettingsScreenProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   
-  // ✅ Utiliser le ThemeContext
   const { isDarkMode, setDarkMode: setGlobalDarkMode } = useTheme();
   
   const [loading, setLoading] = useState(true);
@@ -27,7 +26,6 @@ export default function SettingsScreen({ onClose }: SettingsScreenProps) {
   const [gender, setGender] = useState('femme');
   const [relationshipGoal, setRelationshipGoal] = useState('mariage');
   const [prayerLevel, setPrayerLevel] = useState('5-fois');
-  const [language, setLanguage] = useState('fr');
 
   useEffect(() => {
     loadSettings();
@@ -60,8 +58,7 @@ export default function SettingsScreen({ onClose }: SettingsScreenProps) {
           distance_preference,
           looking_for_gender,
           relationship_goal,
-          prayer_level_preference,
-          language
+          prayer_level_preference
         `)
         .eq('id', user.id)
         .single();
@@ -75,10 +72,6 @@ export default function SettingsScreen({ onClose }: SettingsScreenProps) {
         setHalalMode(profile.halal_mode ?? true);
         setNotifications(profile.notifications_enabled ?? true);
         
-        // ✅ FIX: NE PAS écraser le dark mode actuel
-        // Le ThemeContext est la source de vérité et est déjà synchronisé avec la DB
-        // au démarrage de l'app dans App.tsx
-        
         setAgeRange([
           profile.age_preference_min ?? 22,
           profile.age_preference_max ?? 35
@@ -87,7 +80,6 @@ export default function SettingsScreen({ onClose }: SettingsScreenProps) {
         setGender(profile.looking_for_gender ?? 'femme');
         setRelationshipGoal(profile.relationship_goal ?? 'mariage');
         setPrayerLevel(profile.prayer_level_preference ?? '5-fois');
-        setLanguage(profile.language ?? 'fr');
 
         console.log('✅ Paramètres chargés:', profile);
       }
@@ -98,7 +90,6 @@ export default function SettingsScreen({ onClose }: SettingsScreenProps) {
     }
   };
 
-  // ✅ Gérer le toggle dark mode
   const handleDarkModeToggle = (value: boolean) => {
     setGlobalDarkMode(value);
   };
@@ -117,7 +108,7 @@ export default function SettingsScreen({ onClose }: SettingsScreenProps) {
         .update({
           halal_mode: halalMode,
           notifications_enabled: notifications,
-          dark_mode: isDarkMode,  // ✅ Sauvegarder le dark mode
+          dark_mode: isDarkMode,
           
           age_preference_min: ageRange[0],
           age_preference_max: ageRange[1],
@@ -125,7 +116,6 @@ export default function SettingsScreen({ onClose }: SettingsScreenProps) {
           looking_for_gender: gender,
           relationship_goal: relationshipGoal,
           prayer_level_preference: prayerLevel,
-          language: language,
           
           updated_at: new Date().toISOString(),
         })
@@ -147,13 +137,8 @@ export default function SettingsScreen({ onClose }: SettingsScreenProps) {
 
   if (loading) {
     return (
-      <div 
-        className="flex flex-col h-screen pb-16 bg-slate-50 dark:bg-slate-900"
-        style={{
-          paddingTop: 'env(safe-area-inset-top)',
-        }}
-      >
-        <header className="sticky top-0 z-10 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-5 py-4">
+      <div className="fixed inset-0 bg-slate-50 dark:bg-slate-900 flex flex-col">
+        <header className="flex-shrink-0 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-5 py-4">
           <div className="flex items-center gap-4">
             <button 
               onClick={onClose} 
@@ -176,15 +161,9 @@ export default function SettingsScreen({ onClose }: SettingsScreenProps) {
   }
 
   return (
-    <div 
-      className="flex flex-col h-screen pb-16 bg-slate-50 dark:bg-slate-900"
-      style={{
-        paddingTop: 'env(safe-area-inset-top)',
-        paddingBottom: 'env(safe-area-inset-bottom)',
-      }}
-    >
-      {/* Header */}
-      <header className="sticky top-0 z-10 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-5 py-4">
+    <div className="fixed inset-0 bg-slate-50 dark:bg-slate-900 flex flex-col">
+      {/* Header - Fixed */}
+      <header className="flex-shrink-0 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-5 py-4">
         <div className="flex items-center gap-4">
           <button 
             onClick={onClose} 
@@ -196,9 +175,10 @@ export default function SettingsScreen({ onClose }: SettingsScreenProps) {
         </div>
       </header>
 
+      {/* Content - Scrollable */}
       <div 
         ref={scrollContainerRef}
-        className="flex-1 overflow-y-auto px-5 pt-6 pb-8"
+        className="flex-1 overflow-y-auto px-5 py-6"
       >
         {/* Section: Préférences générales */}
         <div className="mb-6">
@@ -351,34 +331,8 @@ export default function SettingsScreen({ onClose }: SettingsScreenProps) {
           </div>
         </div>
 
-        {/* Section: Langue */}
-        <div className="mb-6">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Langue & Région</h2>
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-5">
-            <div className="flex items-center gap-3 mb-3">
-              <Globe className="w-5 h-5 text-slate-600 dark:text-slate-400" />
-              <label className="font-medium text-slate-900 dark:text-white">Langue de l'application</label>
-            </div>
-            <select 
-              value={language}
-              onChange={(e) => setLanguage(e.target.value)}
-              className="w-full py-3 px-4 border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent"
-            >
-              <option value="fr">Français</option>
-              <option value="wo">Wolof</option>
-              <option value="ar">العربية (Arabe)</option>
-              <option value="en">English</option>
-            </select>
-          </div>
-        </div>
-
         {/* Boutons d'action */}
-        <div 
-          className="space-y-3"
-          style={{
-            paddingBottom: 'calc(env(safe-area-inset-bottom) + 16px)',
-          }}
-        >
+        <div className="space-y-3 pb-32">
           <button 
             onClick={handleSave}
             disabled={saving}

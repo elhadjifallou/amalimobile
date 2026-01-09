@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeft, ArrowRight, Check, Upload, User, Heart, Sparkles, Users,  } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Upload, User, Heart, Sparkles, Users } from 'lucide-react';
 import { supabase, authService } from '@/lib/supabase';
 
 interface ProfileData {
@@ -249,15 +249,9 @@ export default function ProfileCompletion({ onComplete }: ProfileCompletionProps
   };
 
   return (
-    <div 
-      className="flex flex-col min-h-screen bg-gradient-to-b from-rose-50 to-amber-50 dark:from-slate-900 dark:to-slate-800"
-      style={{
-        paddingTop: 'env(safe-area-inset-top)',
-        paddingBottom: 'env(safe-area-inset-bottom)',
-      }}
-    >
-      {/* Header */}
-      <div className="bg-white dark:bg-slate-900 shadow-sm px-5 py-4 flex items-center justify-between sticky top-0 z-10">
+    <div className="fixed inset-0 bg-gradient-to-b from-rose-50 to-amber-50 dark:from-slate-900 dark:to-slate-800 flex flex-col">
+      {/* Header - Fixed */}
+      <div className="flex-shrink-0 bg-white dark:bg-slate-900 shadow-sm px-5 py-4 flex items-center justify-between">
         <button
           onClick={handleBack}
           disabled={currentStep === 1}
@@ -299,7 +293,7 @@ export default function ProfileCompletion({ onComplete }: ProfileCompletionProps
         
         {/* Step 1: Informations de base */}
         {currentStep === 1 && (
-          <div className="space-y-6">
+          <div className="space-y-6 max-w-lg mx-auto">
             <div className="text-center mb-8">
               <div className="w-16 h-16 bg-gradient-to-br from-rose-500 to-amber-500 rounded-full mx-auto mb-4 flex items-center justify-center">
                 <User className="w-8 h-8 text-white" />
@@ -376,7 +370,7 @@ export default function ProfileCompletion({ onComplete }: ProfileCompletionProps
 
         {/* Step 2: À propos de vous */}
         {currentStep === 2 && (
-          <div className="space-y-6">
+          <div className="space-y-6 max-w-lg mx-auto">
             <div className="text-center mb-8">
               <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-full mx-auto mb-4 flex items-center justify-center">
                 <Heart className="w-8 h-8 text-white" />
@@ -442,7 +436,7 @@ export default function ProfileCompletion({ onComplete }: ProfileCompletionProps
 
         {/* Step 3: Vos valeurs */}
         {currentStep === 3 && (
-          <div className="space-y-6">
+          <div className="space-y-6 max-w-lg mx-auto">
             <div className="text-center mb-8">
               <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-full mx-auto mb-4 flex items-center justify-center">
                 <Sparkles className="w-8 h-8 text-white" />
@@ -540,7 +534,7 @@ export default function ProfileCompletion({ onComplete }: ProfileCompletionProps
 
         {/* Step 4: Centres d'intérêt */}
         {currentStep === 4 && (
-          <div className="space-y-6">
+          <div className="space-y-6 max-w-lg mx-auto">
             <div className="text-center mb-8">
               <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full mx-auto mb-4 flex items-center justify-center">
                 <Heart className="w-8 h-8 text-white" />
@@ -574,7 +568,7 @@ export default function ProfileCompletion({ onComplete }: ProfileCompletionProps
 
         {/* Step 5: Photos */}
         {currentStep === 5 && (
-          <div className="space-y-6">
+          <div className="space-y-6 max-w-lg mx-auto">
             <div className="text-center mb-8">
               <div className="w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-500 rounded-full mx-auto mb-4 flex items-center justify-center">
                 <Upload className="w-8 h-8 text-white" />
@@ -624,7 +618,7 @@ export default function ProfileCompletion({ onComplete }: ProfileCompletionProps
       </div>
 
       {/* Footer - Fixed */}
-      <div className="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 px-5 py-4 space-y-3">
+      <div className="flex-shrink-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 px-5 py-4 space-y-3">
         {currentStep < totalSteps ? (
           <button
             onClick={handleNext}

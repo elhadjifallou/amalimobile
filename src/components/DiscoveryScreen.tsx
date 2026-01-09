@@ -21,8 +21,8 @@ interface Profile {
   height: number;
   prayer_frequency: string;
   interests: string[];
-  is_premium?: boolean;  // ✅ AJOUTÉ
-  premium_tier?: 'essentiel' | 'elite' | 'prestige';  // ✅ AJOUTÉ
+  is_premium?: boolean;
+  premium_tier?: 'essentiel' | 'elite' | 'prestige';
 }
 
 export default function DiscoveryScreen() {
@@ -84,7 +84,6 @@ export default function DiscoveryScreen() {
         return age;
       };
 
-      // ✅ MODIFIÉ: Charger is_premium et premium_tier
       const { data: allProfiles, error } = await supabase
         .from('profiles')
         .select('*, is_premium, premium_tier')
@@ -394,89 +393,76 @@ export default function DiscoveryScreen() {
 
   if (loading || likesLoading) {
     return (
-      <>
+      <div className="fixed inset-0 bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-800">
         <Header onSettingsClick={() => setShowSettings(true)} />
         
-        <div 
-          className="flex flex-col h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-800"
-          style={{
-            paddingTop: 'calc(env(safe-area-inset-top) + 80px)',
-          }}
-        >
-          <div className="flex-1 flex items-center justify-center">
-            <div className="text-center">
-              <div className="w-16 h-16 border-4 border-rose-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-slate-600 dark:text-slate-400">Chargement des profils...</p>
-            </div>
+        <div className="flex items-center justify-center h-full">
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-rose-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-slate-600 dark:text-slate-400">Chargement des profils...</p>
           </div>
         </div>
-      </>
+      </div>
     );
   }
 
   return (
-    <>
+    <div className="fixed inset-0 bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-800 flex flex-col">
       <Header onSettingsClick={() => setShowSettings(true)} />
 
-      <div 
-        className="flex flex-col h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-800"
-        style={{
-          paddingTop: 'calc(env(safe-area-inset-top) + 80px)',
-        }}
-      >
-        <div className="flex-1 flex items-center justify-center overflow-hidden h-full">
-          {currentProfile && currentProfileIndex < profiles.length ? (
+      {/* Main content area - full screen */}
+      <div className="flex-1 flex items-center justify-center overflow-hidden">
+        {currentProfile && currentProfileIndex < profiles.length ? (
+          <div className="w-full h-full">
             <ProfileCard
-              profile={{
-                id: parseInt(currentProfile.id),
-                name: currentProfile.name,
-                age: currentProfile.age,
-                location: currentProfile.location,
-                bio: currentProfile.bio || '',
-                image:
-                  currentProfile.photos?.length > 0
-                    ? currentProfile.photos
-                    : currentProfile.profile_photo_url
-                    ? [currentProfile.profile_photo_url]
-                    : [],
-                interests: currentProfile.interests || [],
-                distance: 5,
-                verified: true,
-                compatibility: 85,
-                profession: currentProfile.profession || '',
-                education: currentProfile.education_level || '',
-                height: currentProfile.height || 0,
-                religion: currentProfile.prayer_frequency || '',
-                premiumTier: currentProfile.premium_tier, // ✅ AJOUTÉ
-              }}
-              onLike={() => handleAction('like')}
-              onPass={() => handleAction('pass')}
-              isAnimating={isAnimating}
-            />
-          ) : (
-            <div className="flex items-center justify-center h-full px-6">
-              <div className="text-center max-w-md">
-                <div className="text-6xl mb-4">💫</div>
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
-                  {profiles.length === 0 ? 'Aucun profil disponible' : 'Plus de profils !'}
-                </h2>
-                <p className="text-slate-600 dark:text-slate-400 mb-6">
-                  {profiles.length === 0
-                    ? 'Revenez plus tard pour découvrir de nouveaux profils'
-                    : 'Revenez plus tard pour découvrir de nouveaux profils'}
-                </p>
-                {profiles.length > 0 && (
-                  <button
-                    onClick={() => setCurrentProfileIndex(0)}
-                    className="px-6 py-3 bg-gradient-to-r from-rose-500 to-amber-500 text-white rounded-2xl font-semibold hover:from-rose-600 hover:to-amber-600 transition-all shadow-lg hover:shadow-xl active:scale-95"
-                  >
-                    Recommencer
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
+            profile={{
+              id: parseInt(currentProfile.id),
+              name: currentProfile.name,
+              age: currentProfile.age,
+              location: currentProfile.location,
+              bio: currentProfile.bio || '',
+              image:
+                currentProfile.photos?.length > 0
+                  ? currentProfile.photos
+                  : currentProfile.profile_photo_url
+                  ? [currentProfile.profile_photo_url]
+                  : [],
+              interests: currentProfile.interests || [],
+              distance: 5,
+              verified: true,
+              compatibility: 85,
+              profession: currentProfile.profession || '',
+              education: currentProfile.education_level || '',
+              height: currentProfile.height || 0,
+              religion: currentProfile.prayer_frequency || '',
+              premiumTier: currentProfile.premium_tier,
+            }}
+            onLike={() => handleAction('like')}
+            onPass={() => handleAction('pass')}
+            isAnimating={isAnimating}
+          />
+          </div>
+        ) : (
+          <div className="text-center max-w-md px-6">
+            <div className="text-6xl mb-4">💫</div>
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
+              {profiles.length === 0 ? 'Aucun profil disponible' : 'Plus de profils !'}
+            </h2>
+            <p className="text-slate-600 dark:text-slate-400 mb-6">
+              {profiles.length === 0
+                ? 'Revenez plus tard pour découvrir de nouveaux profils'
+                : 'Revenez plus tard pour découvrir de nouveaux profils'}
+            </p>
+            {profiles.length > 0 && (
+              <button
+                onClick={() => setCurrentProfileIndex(0)}
+                className="px-6 py-3 bg-gradient-to-r from-rose-500 to-amber-500 text-white rounded-2xl font-semibold hover:from-rose-600 hover:to-amber-600 transition-all shadow-lg hover:shadow-xl active:scale-95"
+              >
+                Recommencer
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {showNoLikesModal && (
@@ -506,6 +492,6 @@ export default function DiscoveryScreen() {
           }}
         />
       )}
-    </>
+    </div>
   );
 }
