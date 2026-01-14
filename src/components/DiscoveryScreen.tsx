@@ -22,7 +22,7 @@ interface Profile {
   prayer_frequency: string;
   interests: string[];
   is_premium?: boolean;
-  premium_tier?: 'essentiel' | 'elite' | 'prestige';
+  premium_tier?: 'essentiel' | 'elite' | 'prestige' | 'prestige-femme';
 }
 
 export default function DiscoveryScreen() {
@@ -97,12 +97,55 @@ export default function DiscoveryScreen() {
 
       console.log('📊 Profils bruts trouvés:', allProfiles?.length || 0);
 
+      // 🔥 NOUVEAU : Récupérer les profils déjà vus (likés ou passés)
+      const { data: myLikes, error: likesError } = await supabase
+        .from('likes')
+        .select('to_user_id')
+        .eq('from_user_id', user.id);
+
+      if (likesError) {
+        console.error('⚠️ Erreur récupération likes:', likesError);
+      }
+
+      // 🔥 NOUVEAU : Récupérer les matchs existants
+      const { data: myMatches, error: matchesError } = await supabase
+        .from('matches')
+        .select('user1_id, user2_id')
+        .or(`user1_id.eq.${user.id},user2_id.eq.${user.id}`);
+
+      if (matchesError) {
+        console.error('⚠️ Erreur récupération matchs:', matchesError);
+      }
+
+      // Créer un Set des IDs déjà vus
+      const seenUserIds = new Set<string>();
+      
+      // Ajouter les profils likés/passés
+      myLikes?.forEach(like => seenUserIds.add(like.to_user_id));
+      
+      // Ajouter les matchs
+      myMatches?.forEach(match => {
+        if (match.user1_id === user.id) {
+          seenUserIds.add(match.user2_id);
+        } else {
+          seenUserIds.add(match.user1_id);
+        }
+      });
+
+      console.log('🚫 Profils déjà vus:', seenUserIds.size);
+
       const formattedProfiles = (allProfiles || [])
         .map(profile => ({
           ...profile,
           age: profile.date_of_birth ? calculateAge(profile.date_of_birth) : 0,
         }))
         .filter(profile => {
+          // 🔥 NOUVEAU : Exclure les profils déjà vus
+          if (seenUserIds.has(profile.id)) {
+            console.log('🚫 Exclu (déjà vu):', profile.name);
+            return false;
+          }
+
           if (!profile.name || !profile.profile_photo_url) {
             console.log('❌ Exclu (incomplet):', profile.id);
             return false;
@@ -494,4 +537,4 @@ export default function DiscoveryScreen() {
       )}
     </div>
   );
-}
+}NamedNodeMap

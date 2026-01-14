@@ -10,7 +10,7 @@ interface PremiumScreenProps {
 }
 
 export default function PremiumScreen({ onClose }: PremiumScreenProps) {
-  const [selectedPlan, setSelectedPlan] = useState<string | null>('amali_elite_v2:amali-elite-v2');
+  const [selectedPlan, setSelectedPlan] = useState<string | null>('amalielitev2');
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState<{ [key: string]: IAPProduct }>({});
   const [iapAvailable, setIapAvailable] = useState(false);
@@ -24,19 +24,19 @@ export default function PremiumScreen({ onClose }: PremiumScreenProps) {
         initIAP();
         setIapAvailable(true);
 
-        // ✅ IDs corrects basés sur Google Play Console
+        // ✅ IDs SANS séparateurs (compatibles Google Play ET Apple)
         const checkProducts = () => {
           try {
-            const essentiel = InAppPurchase2.get('amali_essentiel_v2:amali-essentiel-v2');
-            const elite = InAppPurchase2.get('amali_elite_v2:amali-elite-v2');
-            const prestige = InAppPurchase2.get('amali_prestige_v2:amali-prestige-v2');
-            const prestigeFemme = InAppPurchase2.get('amali_prestige_femme_v2:amali-prestige-femme-v2');
+            const essentiel = InAppPurchase2.get('amaliessentielv2');
+            const elite = InAppPurchase2.get('amalielitev2');
+            const prestige = InAppPurchase2.get('amaliprestigev2');
+            const prestigeFemme = InAppPurchase2.get('amaliprestigefemmev2');
 
             setProducts({
-              'amali_essentiel_v2:amali-essentiel-v2': essentiel,
-              'amali_elite_v2:amali-elite-v2': elite,
-              'amali_prestige_v2:amali-prestige-v2': prestige,
-              'amali_prestige_femme_v2:amali-prestige-femme-v2': prestigeFemme,
+              'amaliessentielv2': essentiel,
+              'amalielitev2': elite,
+              'amaliprestigev2': prestige,
+              'amaliprestigefemmev2': prestigeFemme,
             });
 
             console.log('✅ Produits IAP v2 chargés:', { essentiel, elite, prestige, prestigeFemme });
@@ -57,10 +57,10 @@ export default function PremiumScreen({ onClose }: PremiumScreenProps) {
     }
   }, []);
 
-  // ✅ PLANS avec IDs corrects basés sur Google Play
+  // ✅ PLANS avec IDs SANS séparateurs
   const plans = [
     {
-      id: 'amali_essentiel_v2:amali-essentiel-v2',
+      id: 'amaliessentielv2',
       name: 'Essentiel',
       price: '2 900',
       period: 'mois',
@@ -77,7 +77,7 @@ export default function PremiumScreen({ onClose }: PremiumScreenProps) {
       ],
     },
     {
-      id: 'amali_elite_v2:amali-elite-v2',
+      id: 'amalielitev2',
       name: 'Élite',
       price: '4 900',
       period: 'mois',
@@ -96,7 +96,7 @@ export default function PremiumScreen({ onClose }: PremiumScreenProps) {
       ],
     },
     {
-      id: 'amali_prestige_v2:amali-prestige-v2',
+      id: 'amaliprestigev2',
       name: 'Prestige',
       price: '7 900',
       period: 'mois',
@@ -115,7 +115,7 @@ export default function PremiumScreen({ onClose }: PremiumScreenProps) {
       ],
     },
     {
-      id: 'amali_prestige_femme_v2:amali-prestige-femme-v2',
+      id: 'amaliprestigefemmev2',
       name: 'Prestige Femme',
       price: '2 000',
       period: 'mois',
@@ -127,6 +127,7 @@ export default function PremiumScreen({ onClose }: PremiumScreenProps) {
       special: 'Offre spéciale femmes',
       features: [
         { text: 'Likes illimités', included: true },
+        { text: '30 super likes par jour', included: true },
         { text: 'Voir qui vous a aimé', included: true },
         { text: 'Annuler un match', included: true },
         { text: 'Priorité modérée', included: true },
@@ -143,8 +144,8 @@ export default function PremiumScreen({ onClose }: PremiumScreenProps) {
 
       // ✅ DÉTECTION du type basé sur les nouveaux IDs
       const planType = planId.includes('essentiel') ? 'essentiel' 
+        : planId.includes('femme') ? 'prestige-femme'
         : planId.includes('elite') ? 'elite'
-        : planId.includes('prestige_femme') ? 'prestige-femme'
         : 'prestige';
 
       const { error } = await supabase

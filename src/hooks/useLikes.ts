@@ -22,11 +22,11 @@ interface LikesLimits {
 }
 
 const LIMITS: LikesLimits = {
-  free: { likes: 10, superLikes: 1, rewind: 0 },
+  free: { likes: 30, superLikes: 1, rewind: 0 }, // ✅ 30 likes gratuits
   essentiel: { likes: 80, superLikes: 5, rewind: 0 },
   elite: { likes: 100, superLikes: 7, rewind: 3 },
   prestige: { likes: 999999, superLikes: 20, rewind: 999999 }, // Illimité
-  prestige_femme: { likes: 999999, superLikes: 10, rewind: 0 }, // Illimité
+  prestige_femme: { likes: 999999, superLikes: 30, rewind: 0 }, // ✅ 30 super likes
 };
 
 export const useLikes = (userId: string) => {
