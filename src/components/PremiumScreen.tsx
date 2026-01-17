@@ -16,7 +16,6 @@ export default function PremiumScreen({ onClose }: PremiumScreenProps) {
   const [iapAvailable, setIapAvailable] = useState(false);
 
   useEffect(() => {
-    // Vérifier si on est sur une vraie plateforme mobile
     const isNativePlatform = Capacitor.isNativePlatform();
     
     if (isNativePlatform) {
@@ -24,22 +23,20 @@ export default function PremiumScreen({ onClose }: PremiumScreenProps) {
         initIAP();
         setIapAvailable(true);
 
-        // ✅ IDs SANS séparateurs (compatibles Google Play ET Apple)
+        // ✅ UNIQUEMENT LES 2 PRODUITS CONFIGURÉS DANS APP STORE CONNECT
         const checkProducts = () => {
           try {
-            const essentiel = InAppPurchase2.get('amaliessentielv2');
             const elite = InAppPurchase2.get('amalielitev2');
             const prestige = InAppPurchase2.get('amaliprestigev2');
-            const prestigeFemme = InAppPurchase2.get('amaliprestigefemmev2');
 
             setProducts({
-              'amaliessentielv2': essentiel,
               'amalielitev2': elite,
               'amaliprestigev2': prestige,
-              'amaliprestigefemmev2': prestigeFemme,
             });
 
-            console.log('✅ Produits IAP v2 chargés:', { essentiel, elite, prestige, prestigeFemme });
+            console.log('✅ Produits IAP chargés:', { elite, prestige });
+            console.log('Prix Élite:', elite?.price, elite?.priceMicros);
+            console.log('Prix Prestige:', prestige?.price, prestige?.priceMicros);
           } catch (error) {
             console.error('❌ Erreur lors du chargement des produits:', error);
           }
@@ -57,25 +54,8 @@ export default function PremiumScreen({ onClose }: PremiumScreenProps) {
     }
   }, []);
 
-  // ✅ PLANS avec IDs SANS séparateurs
+  // ✅ SEULEMENT LES 2 PLANS QUI EXISTENT DANS APP STORE CONNECT
   const plans = [
-    {
-      id: 'amaliessentielv2',
-      name: 'Essentiel',
-      price: '2 900',
-      period: 'mois',
-      color: 'from-amber-600 to-orange-700',
-      borderColor: 'border-amber-500',
-      bgColor: 'bg-amber-50',
-      icon: Star,
-      features: [
-        { text: '80 likes par jour', included: true },
-        { text: '5 super likes par jour', included: true },
-        { text: 'Voir qui vous a aimé', included: false },
-        { text: 'Annuler un swipe', included: false },
-        { text: 'Visibilité accrue', included: false },
-      ],
-    },
     {
       id: 'amalielitev2',
       name: 'Élite',
@@ -114,64 +94,54 @@ export default function PremiumScreen({ onClose }: PremiumScreenProps) {
         { text: 'Statistiques de popularité', included: true },
       ],
     },
-    {
-      id: 'amaliprestigefemmev2',
-      name: 'Prestige Femme',
-      price: '2 000',
-      period: 'mois',
-      color: 'from-pink-400 to-rose-500',
-      borderColor: 'border-pink-400',
-      bgColor: 'bg-pink-50',
-      icon: Sparkles,
-      forWomenOnly: true,
-      special: 'Offre spéciale femmes',
-      features: [
-        { text: 'Likes illimités', included: true },
-        { text: '30 super likes par jour', included: true },
-        { text: 'Voir qui vous a aimé', included: true },
-        { text: 'Annuler un match', included: true },
-        { text: 'Priorité modérée', included: true },
-        { text: 'Sécurité renforcée', included: true },
-      ],
-    },
   ];
 
-  // Mettre à jour le profil dans Supabase après achat
+  // ✅ CORRECTION : Mapping correct des tiers
   const updatePremiumStatus = async (planId: string) => {
     try {
       const { user } = await authService.getCurrentUser();
-      if (!user) return;
+      if (!user) {
+        console.error('❌ Utilisateur non connecté');
+        return;
+      }
 
-      // ✅ DÉTECTION du type basé sur les nouveaux IDs
-      const planType = planId.includes('essentiel') ? 'essentiel' 
-        : planId.includes('femme') ? 'prestige-femme'
-        : planId.includes('elite') ? 'elite'
-        : 'prestige';
+      // ✅ Mapping correct basé sur les IDs réels
+      const planType = planId === 'amalielitev2' ? 'elite' 
+        : planId === 'amaliprestigev2' ? 'prestige'
+        : 'unknown';
+
+      if (planType === 'unknown') {
+        console.error('❌ Type de plan inconnu:', planId);
+        return;
+      }
+
+      console.log('📝 Mise à jour du profil:', { userId: user.id, planType, planId });
 
       const { error } = await supabase
         .from('profiles')
         .update({
           is_premium: true,
           premium_tier: planType,
-          premium_expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 jours
+          premium_expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
           updated_at: new Date().toISOString(),
         })
         .eq('id', user.id);
 
       if (error) {
         console.error('❌ Erreur mise à jour premium:', error);
+        throw error;
       } else {
-        console.log('✅ Profil premium activé !', planType);
+        console.log('✅ Profil premium activé !', { planType, userId: user.id });
       }
     } catch (error) {
-      console.error('❌ Erreur:', error);
+      console.error('❌ Erreur updatePremiumStatus:', error);
+      throw error;
     }
   };
 
   const handleSubscribe = (planId: string | null) => {
     if (!planId || loading) return;
 
-    // Si IAP n'est pas disponible (mode web ou non configuré)
     if (!iapAvailable) {
       alert('⚠️ Paiements non configurés\n\nLes paiements in-app ne sont pas encore configurés sur Google Play Console et App Store Connect.\n\nCette fonctionnalité sera disponible après la configuration.');
       return;
@@ -179,46 +149,70 @@ export default function PremiumScreen({ onClose }: PremiumScreenProps) {
 
     const product = products[planId];
     if (!product) {
+      console.error('❌ Produit introuvable:', planId);
       alert('Produit non disponible. Veuillez réessayer.');
       return;
     }
 
     if (!product.canPurchase) {
+      console.error('❌ Produit non achetable:', product);
       alert('Ce produit ne peut pas être acheté pour le moment.');
       return;
     }
 
+    console.log('🛒 Démarrage achat:', { planId, product });
     setLoading(true);
 
     try {
-      // Configurer les événements AVANT l'achat
-      InAppPurchase2.when(planId).approved((p: IAPProduct) => {
-        console.log('✅ Achat approuvé:', p.id);
+      // ✅ Configuration des événements AVANT l'achat
+      InAppPurchase2.when(planId).approved(async (p: IAPProduct) => {
+        console.log('✅ Achat approuvé:', { id: p.id, transaction: p.transaction });
         
-        // Mettre à jour le profil
-        updatePremiumStatus(p.id).then(() => {
+        try {
+          await updatePremiumStatus(p.id);
           p.finish();
           setLoading(false);
           alert('🎉 Abonnement activé avec succès !');
           onClose();
-        });
+        } catch (error) {
+          console.error('❌ Erreur lors de l\'activation:', error);
+          setLoading(false);
+          alert('Erreur lors de l\'activation de l\'abonnement. Contactez le support.');
+        }
       });
 
+      // ✅ Gestion d'erreur améliorée
       InAppPurchase2.when(planId).error((err: any) => {
-        console.error('❌ Erreur achat:', err);
+        console.error('❌ Erreur achat complète:', {
+          message: err.message,
+          code: err.code,
+          planId,
+          error: err
+        });
         setLoading(false);
-        alert(`Erreur lors de l'achat: ${err.message || 'Erreur inconnue'}`);
+        
+        let errorMessage = 'Erreur lors de l\'achat';
+        if (err.code === 'E_USER_CANCELLED') {
+          errorMessage = 'Achat annulé';
+        } else if (err.code === 'E_NETWORK_ERROR') {
+          errorMessage = 'Erreur réseau. Vérifiez votre connexion.';
+        } else if (err.message) {
+          errorMessage = err.message;
+        }
+        
+        alert(`❌ ${errorMessage}`);
       });
 
       InAppPurchase2.when(planId).cancelled(() => {
-        console.log('⚠️ Achat annulé');
+        console.log('⚠️ Achat annulé par l\'utilisateur');
         setLoading(false);
       });
 
-      // Lancer l'achat
+      // ✅ Lancer l'achat
+      console.log('🚀 Lancement commande:', planId);
       InAppPurchase2.order(planId);
     } catch (error: any) {
-      console.error('❌ Erreur lors de la souscription:', error);
+      console.error('❌ Erreur catch handleSubscribe:', error);
       setLoading(false);
       alert('Erreur lors du traitement du paiement');
     }
@@ -300,12 +294,6 @@ export default function PremiumScreen({ onClose }: PremiumScreenProps) {
                       Populaire
                     </div>
                   )}
-                  
-                  {plan.special && (
-                    <div className="absolute top-0 right-0 px-3 py-1 bg-gradient-to-r from-pink-500 to-rose-600 text-white text-xs font-semibold rounded-bl-xl rounded-tr-xl">
-                      {plan.special}
-                    </div>
-                  )}
 
                   <div className="flex items-start gap-4 mb-4">
                     <div
@@ -318,10 +306,10 @@ export default function PremiumScreen({ onClose }: PremiumScreenProps) {
                       <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">{plan.name}</h3>
                       <div className="flex items-baseline gap-1">
                         <span className="text-3xl font-bold text-slate-900 dark:text-white">
-                          {product?.price || plan.price}
+                          {product?.price || `${plan.price} FCFA`}
                         </span>
                         <span className="text-slate-600 dark:text-slate-400">
-                          {product?.priceMicros ? '' : 'FCFA'} / {plan.period}
+                          / {plan.period}
                         </span>
                       </div>
                     </div>

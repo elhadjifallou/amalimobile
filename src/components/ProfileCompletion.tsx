@@ -99,12 +99,11 @@ export default function ProfileCompletion({ onComplete }: ProfileCompletionProps
     }));
   };
 
-  // ✅ SEULEMENT LE NOM EST REQUIS (Étape 1)
   const canGoNext = () => {
     if (currentStep === 1) {
       return profileData.name.trim().length > 0;
     }
-    return true; // Toutes les autres étapes sont optionnelles
+    return true;
   };
 
   const handleNext = () => {
@@ -119,7 +118,6 @@ export default function ProfileCompletion({ onComplete }: ProfileCompletionProps
     }
   };
 
-  // ✅ SKIP - Permet de sauter la complétion
   const handleSkip = async () => {
     if (!profileData.name.trim()) {
       alert('Veuillez au moins entrer votre prénom');
@@ -135,7 +133,6 @@ export default function ProfileCompletion({ onComplete }: ProfileCompletionProps
         return;
       }
 
-      // ✅ Sauvegarde JUSTE le nom et marque comme complété
       const { error: updateError } = await supabase
         .from('profiles')
         .update({
@@ -146,15 +143,12 @@ export default function ProfileCompletion({ onComplete }: ProfileCompletionProps
         .eq('id', user.id);
 
       if (updateError) throw updateError;
-
-      console.log('✅ Profil minimal créé (nom seulement)');
       
       setTimeout(() => {
         onComplete();
       }, 500);
 
     } catch (error: any) {
-      console.error('❌ Erreur:', error);
       alert('Erreur lors de la sauvegarde : ' + error.message);
     } finally {
       setLoading(false);
@@ -176,7 +170,6 @@ export default function ProfileCompletion({ onComplete }: ProfileCompletionProps
         return;
       }
 
-      // ✅ Upload photos SEULEMENT si il y en a
       setUploadingPhotos(true);
       const photoUrls: string[] = [];
       
@@ -201,14 +194,12 @@ export default function ProfileCompletion({ onComplete }: ProfileCompletionProps
 
       setUploadingPhotos(false);
 
-      // ✅ Construire l'objet de mise à jour SEULEMENT avec les champs remplis
       const updateData: any = {
         name: profileData.name,
         profile_completed: true,
         updated_at: new Date().toISOString(),
       };
 
-      // ✅ Ajouter les champs SEULEMENT s'ils sont remplis
       if (profileData.dateOfBirth) updateData.date_of_birth = profileData.dateOfBirth;
       if (profileData.gender) updateData.gender = profileData.gender;
       if (profileData.location) updateData.location = profileData.location;
@@ -232,15 +223,12 @@ export default function ProfileCompletion({ onComplete }: ProfileCompletionProps
         .eq('id', user.id);
 
       if (updateError) throw updateError;
-
-      console.log('✅ Profil complété avec succès !');
       
       setTimeout(() => {
         onComplete();
       }, 500);
 
     } catch (error: any) {
-      console.error('❌ Erreur:', error);
       alert('Erreur lors de la sauvegarde : ' + error.message);
     } finally {
       setLoading(false);
@@ -278,7 +266,6 @@ export default function ProfileCompletion({ onComplete }: ProfileCompletionProps
           </p>
         </div>
 
-        {/* ✅ Bouton SKIP visible partout */}
         <button
           onClick={handleSkip}
           disabled={!profileData.name.trim() || loading}
@@ -648,7 +635,6 @@ export default function ProfileCompletion({ onComplete }: ProfileCompletionProps
           </button>
         )}
 
-        {/* ✅ Bouton "Commencer" pour skip complet */}
         <button
           onClick={handleSkip}
           disabled={!profileData.name.trim() || loading}
