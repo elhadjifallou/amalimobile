@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Crown, Sparkles, Star, Check, Eye, RotateCcw, TrendingUp, Video, Shield } from 'lucide-react';
+import { ArrowLeft, Crown, Sparkles, Check, Eye, RotateCcw, TrendingUp, Video, Shield } from 'lucide-react';
 import { InAppPurchase2, IAPProduct } from '@awesome-cordova-plugins/in-app-purchase-2';
 import { supabase, authService } from '@/lib/supabase';
 import { initIAP } from '../iap';
