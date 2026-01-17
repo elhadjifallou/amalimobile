@@ -2,28 +2,21 @@ import { InAppPurchase2, IAPProduct } from '@awesome-cordova-plugins/in-app-purc
 
 export function initIAP() {
   document.addEventListener('deviceready', () => {
-    console.log("Device ready → Initialisation IAP...");
-
-    InAppPurchase2.verbosity = InAppPurchase2.DEBUG;
-
-    // Enregistrer tes produits
+    // ✅ LES 4 ABONNEMENTS avec les IDs CORRECTS
     InAppPurchase2.register([
-      { id: 'essentiel', type: InAppPurchase2.PAID_SUBSCRIPTION },
-      { id: 'elite', type: InAppPurchase2.PAID_SUBSCRIPTION },
-      { id: 'prestige', type: InAppPurchase2.PAID_SUBSCRIPTION },
-      { id: 'prestige-femme', type: InAppPurchase2.PAID_SUBSCRIPTION },
+      { id: 'amaliessentielv2', type: InAppPurchase2.PAID_SUBSCRIPTION },
+      { id: 'amalielitev2', type: InAppPurchase2.PAID_SUBSCRIPTION },
+      { id: 'amaliprestigev2', type: InAppPurchase2.PAID_SUBSCRIPTION },
+      { id: 'amaliprestigefemmev2', type: InAppPurchase2.PAID_SUBSCRIPTION },
     ]);
 
     InAppPurchase2.refresh();
 
-    // Écouter les achats validés avec type
-    ['essentiel', 'elite', 'prestige', 'prestige-femme'].forEach((id) => {
+    // Écouter les achats validés
+    ['amaliessentielv2', 'amalielitev2', 'amaliprestigev2', 'amaliprestigefemmev2'].forEach((id) => {
       InAppPurchase2.when(id).approved((purchase: IAPProduct) => {
-        console.log(`Achat validé : ${id}`);
         purchase.finish();
       });
     });
-
-    console.log("IAP initialisé !");
   });
 }
