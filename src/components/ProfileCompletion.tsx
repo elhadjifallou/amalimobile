@@ -237,7 +237,15 @@ export default function ProfileCompletion({ onComplete }: ProfileCompletionProps
   };
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-b from-rose-50 to-amber-50 dark:from-slate-900 dark:to-slate-800 flex flex-col">
+    <div 
+      className="fixed inset-0 bg-gradient-to-b from-rose-50 to-amber-50 dark:from-slate-900 dark:to-slate-800 flex flex-col"
+      style={{
+        paddingTop: 'env(safe-area-inset-top)',
+        paddingBottom: 'env(safe-area-inset-bottom)',
+        paddingLeft: 'env(safe-area-inset-left)',
+        paddingRight: 'env(safe-area-inset-right)',
+      }}
+    >
       {/* Header - Fixed */}
       <div className="flex-shrink-0 bg-white dark:bg-slate-900 shadow-sm px-5 py-4 flex items-center justify-between">
         <button
@@ -275,12 +283,14 @@ export default function ProfileCompletion({ onComplete }: ProfileCompletionProps
         </button>
       </div>
 
-      {/* Content - Scrollable */}
-      <div className="flex-1 overflow-y-auto px-5 py-6">
+      {/* Content - Scrollable + Centré */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="min-h-full flex items-center justify-center px-5 py-6">
+          <div className="w-full max-w-lg">
         
         {/* Step 1: Informations de base */}
         {currentStep === 1 && (
-          <div className="space-y-6 max-w-lg mx-auto">
+          <div className="space-y-6">
             <div className="text-center mb-8">
               <div className="w-16 h-16 bg-gradient-to-br from-rose-500 to-amber-500 rounded-full mx-auto mb-4 flex items-center justify-center">
                 <User className="w-8 h-8 text-white" />
@@ -357,7 +367,7 @@ export default function ProfileCompletion({ onComplete }: ProfileCompletionProps
 
         {/* Step 2: À propos de vous */}
         {currentStep === 2 && (
-          <div className="space-y-6 max-w-lg mx-auto">
+          <div className="space-y-6">
             <div className="text-center mb-8">
               <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-full mx-auto mb-4 flex items-center justify-center">
                 <Heart className="w-8 h-8 text-white" />
@@ -423,7 +433,7 @@ export default function ProfileCompletion({ onComplete }: ProfileCompletionProps
 
         {/* Step 3: Vos valeurs */}
         {currentStep === 3 && (
-          <div className="space-y-6 max-w-lg mx-auto">
+          <div className="space-y-6">
             <div className="text-center mb-8">
               <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-full mx-auto mb-4 flex items-center justify-center">
                 <Sparkles className="w-8 h-8 text-white" />
@@ -521,7 +531,7 @@ export default function ProfileCompletion({ onComplete }: ProfileCompletionProps
 
         {/* Step 4: Centres d'intérêt */}
         {currentStep === 4 && (
-          <div className="space-y-6 max-w-lg mx-auto">
+          <div className="space-y-6">
             <div className="text-center mb-8">
               <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full mx-auto mb-4 flex items-center justify-center">
                 <Heart className="w-8 h-8 text-white" />
@@ -555,7 +565,7 @@ export default function ProfileCompletion({ onComplete }: ProfileCompletionProps
 
         {/* Step 5: Photos */}
         {currentStep === 5 && (
-          <div className="space-y-6 max-w-lg mx-auto">
+          <div className="space-y-6">
             <div className="text-center mb-8">
               <div className="w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-500 rounded-full mx-auto mb-4 flex items-center justify-center">
                 <Upload className="w-8 h-8 text-white" />
@@ -602,6 +612,8 @@ export default function ProfileCompletion({ onComplete }: ProfileCompletionProps
             </p>
           </div>
         )}
+          </div>
+        </div>
       </div>
 
       {/* Footer - Fixed */}
