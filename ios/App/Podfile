@@ -24,7 +24,11 @@ end
 
 target 'App' do
   capacitor_pods
-  # Add your Pods here
+  
+  # ✅ Force les versions récentes avec Privacy Manifests
+  pod 'GoogleSignIn', '~> 7.1'
+  pod 'GTMAppAuth', '~> 4.1'
+  pod 'GTMSessionFetcher/Core', '~> 3.5'
 end
 
 post_install do |installer|
