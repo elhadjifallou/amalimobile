@@ -126,24 +126,25 @@ export default function AuthScreen({ onAuthenticated }: AuthScreenProps) {
     }
   };
 
-  const handleGoogleAuth = async () => {
-    setLoading(true);
-    setError('');
+  // ❌ Google Auth temporairement désactivé
+  // const handleGoogleAuth = async () => {
+  //   setLoading(true);
+  //   setError('');
 
-    try {
-      const result = await authService.loginWithGoogle();
-      if (result.success) {
-        setSuccess('Connexion Google réussie !');
-        setTimeout(() => onAuthenticated(), 1000);
-      } else {
-        setError(result.error || 'Erreur de connexion Google');
-      }
-    } catch (err) {
-      setError('Une erreur est survenue. Veuillez réessayer.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  //   try {
+  //     const result = await authService.loginWithGoogle();
+  //     if (result.success) {
+  //       setSuccess('Connexion Google réussie !');
+  //       setTimeout(() => onAuthenticated(), 1000);
+  //     } else {
+  //       setError(result.error || 'Erreur de connexion Google');
+  //     }
+  //   } catch (err) {
+  //     setError('Une erreur est survenue. Veuillez réessayer.');
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const handleAppleAuth = async () => {
     setLoading(true);
@@ -284,7 +285,8 @@ export default function AuthScreen({ onAuthenticated }: AuthScreenProps) {
                     <span className="font-medium">Apple</span>
                   </button>
 
-                  <button
+                  {/* ❌ Google Sign-In temporairement désactivé */}
+                  {/* <button
                     onClick={handleGoogleAuth}
                     disabled={loading}
                     className="w-full flex items-center justify-center gap-3 py-3.5 px-4 border-2 border-slate-300 rounded-2xl hover:bg-slate-50 transition-all disabled:opacity-50"
@@ -296,7 +298,7 @@ export default function AuthScreen({ onAuthenticated }: AuthScreenProps) {
                       <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                     </svg>
                     <span className="font-medium text-slate-700">Google</span>
-                  </button>
+                  </button> */}
                 </div>
               </>
             )}
